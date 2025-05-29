@@ -1,4 +1,3 @@
-import { click } from "@testing-library/user-event/dist/click";
 import React from "react";
 
 function getWeatherIcon(wmoCode) {
@@ -103,7 +102,7 @@ class App extends React.Component {
           onChangeLocation={this.setLocation}
         />
 
-        <button onClick={this.fetchWeather}>Get Weather</button>
+        {/* <button onClick={this.fetchWeather}>Get Weather</button> */}
 
         {this.state.isLoading && <p className="loader">Loading..</p>}
 
@@ -126,7 +125,7 @@ class Input extends React.Component {
       <div>
         <input
           type="text"
-          placeholder="Search from location..."
+          placeholder="Lisbon"
           value={this.props.location}
           onChange={this.props.onChangeLocation}
         ></input>
