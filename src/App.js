@@ -54,7 +54,7 @@ class App extends React.Component {
         `https://geocoding-api.open-meteo.com/v1/search?name=${this.state.location}`
       );
       const geoData = await geoRes.json();
-      console.log(geoData);
+      // console.log(geoData);
 
       if (!geoData.results) throw new Error("Location not found");
 
@@ -69,7 +69,7 @@ class App extends React.Component {
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&timezone=${timezone}&daily=weathercode,temperature_2m_max,temperature_2m_min`
       );
       const weatherData = await weatherRes.json();
-      console.log(weatherData);
+      // console.log(weatherData);
       this.setState({ weather: weatherData.daily });
     } catch (err) {
       console.error(err);
@@ -83,7 +83,7 @@ class App extends React.Component {
     this.setState({ isLoading: true });
 
     this.debounceTimer = setTimeout(() => {
-      console.log("delaying");
+      // console.log("delaying");
       this.fetchWeather();
       this.setState({ isLoading: false });
     }, time); // time second delay
