@@ -33,8 +33,10 @@ function formatDay(dateStr) {
 }
 
 class App extends React.Component {
+  debounceTimer = null;
+
   state = {
-    location: "Lisbon",
+    location: "",
     isLoading: false,
     displayLocation: "",
     weather: {},
@@ -52,7 +54,7 @@ class App extends React.Component {
         `https://geocoding-api.open-meteo.com/v1/search?name=${this.state.location}`
       );
       const geoData = await geoRes.json();
-      // console.log(geoData);
+      console.log(geoData);
 
       if (!geoData.results) throw new Error("Location not found");
 
@@ -67,6 +69,7 @@ class App extends React.Component {
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&timezone=${timezone}&daily=weathercode,temperature_2m_max,temperature_2m_min`
       );
       const weatherData = await weatherRes.json();
+      console.log(weatherData);
       this.setState({ weather: weatherData.daily });
     } catch (err) {
       console.error(err);
@@ -75,21 +78,47 @@ class App extends React.Component {
     }
   };
 
-  setLocation = (e) => this.setState({ location: e.target.value });
+  debouncedFetchWeather = (time) => {
+    clearTimeout(this.debounceTimer);
+    this.setState({ isLoading: true });
+
+    this.debounceTimer = setTimeout(() => {
+      console.log("delaying");
+      this.fetchWeather();
+      this.setState({ isLoading: false });
+    }, time); // time second delay
+  };
+
+  setLocation = (e) => {
+    this.setState(
+      {
+        location: e.target.value,
+        weather: {},
+      },
+      () => {
+        this.debouncedFetchWeather(3000);
+      }
+    );
+  };
+
+  // setLocation = (e) => this.setState({ location: e.target.value });
 
   // useEffect []
   componentDidMount() {
-    this.fetchWeather();
-
-    this.setState({ location: localStorage.getItem("location") || "" });
+    const savedLocation = localStorage.getItem("location") || "";
+    this.setState({ location: savedLocation }, () => {
+      if (savedLocation.length > 1) this.fetchWeather();
+    });
   }
 
   // useEffect [location]
   componentDidUpdate(prevProps, prevState) {
     if (this.state.location !== prevState.location) {
-      this.fetchWeather();
-
-      localStorage.setItem("location", this.state.location);
+      // this.fetchWeather();
+      this.debouncedFetchWeather(2000);
+      if (this.state.location.length > 1) {
+        localStorage.setItem("location", this.state.location);
+      }
     }
   }
 
@@ -106,7 +135,7 @@ class App extends React.Component {
 
         {this.state.isLoading && <p className="loader">Loading..</p>}
 
-        {this.state.weather.weathercode && (
+        {this.state.weather && this.state.weather.weathercode && (
           <Weather
             weather={this.state.weather}
             location={this.state.displayLocation}
@@ -125,7 +154,7 @@ class Input extends React.Component {
       <div>
         <input
           type="text"
-          placeholder="Lisbon"
+          placeholder="location"
           value={this.props.location}
           onChange={this.props.onChangeLocation}
         ></input>
